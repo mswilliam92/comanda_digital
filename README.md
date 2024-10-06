@@ -11,7 +11,7 @@ git checkout -b nome_da_branch/ criando branch a partir da main
 
 git status/ verificar o status do projeto
 
-git add feature/ adicionando mudanças
+git add caminho dos arquivos alterados/ adicionando mudanças
 
 git status/ verificar se foi adicionado com sucesso
 
