@@ -3,6 +3,8 @@ package com.ibeus.Comanda.Digital.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.List;
+
 @Entity
 @Table(name = "dishes")
 @Data
@@ -17,6 +19,7 @@ public class Dish {
     private String description;
 
     private Double price;
+
 
     public String getDescription(){
         return description;

@@ -6,11 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(name = "orders")
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String status;
+    private String status = "EM PREPARO";
     private Double totalPrice;
     private String name;
 
@@ -20,6 +21,8 @@ public class Order {
             joinColumns = @JoinColumn(name = "order_id"),
             inverseJoinColumns = @JoinColumn(name = "dish_id")
     )
+    private List<Dish> dishes;
+
 
     public String getStatus(){
         return status;
@@ -29,9 +32,9 @@ public class Order {
         this.status = status;
     }
 
-    public Long getId(){
-        return id;
-    }
+//    public Long getId(){
+//        return id;
+//    }
 
     public void setId(Long id){
         this.id = id;
