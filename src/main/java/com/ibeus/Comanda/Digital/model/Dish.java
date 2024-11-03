@@ -20,6 +20,11 @@ public class Dish {
 
     private Double price;
 
+    public Dish() {
+    }
+    public Dish(Long dishId) {
+    }
+
 
     public String getDescription(){
         return description;
@@ -41,7 +46,7 @@ public class Dish {
         return price;
     }
 
-        public void setPrice(Double price){
+    public void setPrice(Double price){
             this.price = price;
         }
 

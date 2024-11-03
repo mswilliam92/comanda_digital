@@ -2,7 +2,7 @@ package com.ibeus.Comanda.Digital.model;
 
 import jakarta.persistence.*;
 @Entity
-@Table(name = "order_dishes")
+@Table(name = "order_dish")
 public class OrderDish {
 
     @Id
