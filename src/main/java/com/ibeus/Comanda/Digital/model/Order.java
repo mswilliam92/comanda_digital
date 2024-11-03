@@ -11,18 +11,13 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String status = "EM PREPARO";
+    private String status;
     private Double totalPrice;
-    private String name;
 
-    @ManyToMany
-    @JoinTable(
-            name = "order_dishes",
-            joinColumns = @JoinColumn(name = "order_id"),
-            inverseJoinColumns = @JoinColumn(name = "dish_id")
-    )
-    private List<Dish> dishes;
-
+    public Order() {
+    }
+    public Order(Long orderId) {
+    }
 
     public String getStatus(){
         return status;
@@ -32,9 +27,9 @@ public class Order {
         this.status = status;
     }
 
-//    public Long getId(){
-//        return id;
-//    }
+    public Long getId(){
+        return id;
+    }
 
     public void setId(Long id){
         this.id = id;

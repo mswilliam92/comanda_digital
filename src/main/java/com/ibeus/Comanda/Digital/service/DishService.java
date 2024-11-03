@@ -19,7 +19,7 @@ public class DishService {
     }
 
     public Dish findById(Long id) {
-        return dishRepository.findById(id).orElseThrow(() -> new RuntimeException("Dish not found"));
+        return dishRepository.findById(id).orElseThrow(() -> new RuntimeException("Prato não encontrado"));
     }
 
     public Dish create(Dish dish) {
