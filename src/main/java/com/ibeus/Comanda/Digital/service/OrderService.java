@@ -30,7 +30,7 @@ public class OrderService {
     public Order updateOrder(Long id, Order updatedOrder) {
         return orderRepository.findById(id).map(order -> {
             order.setStatus(updatedOrder.getStatus());
-            order.setId(updatedOrder.getId());
+//            order.setId(updatedOrder.getId());
             order.setTotalPrice(updatedOrder.getTotalPrice());
             return orderRepository.save(order);
         }).orElse(null);
