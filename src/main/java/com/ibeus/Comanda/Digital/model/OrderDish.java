@@ -1,5 +1,6 @@
 package com.ibeus.Comanda.Digital.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 @Entity
 @Table(name = "order_dish")
@@ -11,6 +12,7 @@ public class OrderDish {
 
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)
+    @JsonBackReference
     private Order order;
 
     @ManyToOne
