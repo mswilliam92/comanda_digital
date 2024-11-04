@@ -5,6 +5,9 @@ public class OrderDishDto {
     private Long dishId;
     private int quantity;
 
+    public OrderDishDto(){
+
+    }
 
     public Long getOrderId() {
         return orderId;
