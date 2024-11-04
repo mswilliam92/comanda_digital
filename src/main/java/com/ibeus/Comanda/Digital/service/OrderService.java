@@ -5,6 +5,7 @@ import com.ibeus.Comanda.Digital.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -23,11 +24,13 @@ public class OrderService {
     public List<Order> findAll() {
         return orderRepository.findAll();
     }
-
+    @Transactional
     public Order saveOrder(Order order) {
-        return orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
+        orderRepository.flush();
+        return savedOrder;
     }
-
+    @Transactional
     public Order updateOrder(Long id, Order updatedOrder) {
         return orderRepository.findById(id).map(order -> {
             order.setStatus(updatedOrder.getStatus());

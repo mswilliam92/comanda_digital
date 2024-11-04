@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/order-dish")
@@ -39,12 +40,11 @@ public class OrderDishController {
         Order order = orderService.findById(orderDishRequestDto.getOrderId());
 
 
-        List<OrderDish> orderDishes = new ArrayList<>();
-
-
         if (orderDishRequestDto.getDishes() == null || orderDishRequestDto.getDishes().isEmpty()) {
             return ResponseEntity.badRequest().body(null);
         }
+
+        List<OrderDish> orderDishes = new ArrayList<>();
 
 
         for (OrderDishDto orderDishDto : orderDishRequestDto.getDishes()) {
@@ -61,15 +61,24 @@ public class OrderDishController {
                 return ResponseEntity.badRequest().body(null);
             }
 
-
-            OrderDish orderDish = new OrderDish();
-            orderDish.setOrder(order);
-            orderDish.setDish(dish);
-            orderDish.setQuantity(orderDishDto.getQuantity());
-
-
-            orderDishes.add(orderDishService.saveOrderDish(orderDish));
+            Optional<OrderDish> existingOrderDishOpt = order.getOrderDishes().stream()
+                    .filter(od -> od.getDish().getId().equals(dish.getId()))
+                    .findFirst();
+            if (existingOrderDishOpt.isPresent()) {
+                OrderDish existingOrderDish = existingOrderDishOpt.get();
+                int newQuantity = existingOrderDish.getQuantity() + orderDishDto.getQuantity();
+                existingOrderDish.setQuantity(newQuantity);
+                orderDishes.add(orderDishService.saveOrderDish(existingOrderDish));
+            } else {
+                OrderDish orderDish = new OrderDish();
+                orderDish.setOrder(order);
+                orderDish.setDish(dish);
+                orderDish.setQuantity(orderDishDto.getQuantity());
+                orderDishes.add(orderDishService.saveOrderDish(orderDish));
+            }
         }
+        order.updateTotalPrice();
+        orderService.saveOrder(order);
 
         return ResponseEntity.status(201).body(orderDishes);
         }
@@ -84,6 +93,12 @@ public class OrderDishController {
         return orderDishRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<OrderDish> updateOrderDish(@PathVariable Long id, @RequestBody OrderDishDto orderDishDto) {
+        OrderDish updatedOrderDish = orderDishService.saveOrderDish(id, orderDishDto);
+        return ResponseEntity.ok(updatedOrderDish);
     }
 
     @DeleteMapping("/{id}")
