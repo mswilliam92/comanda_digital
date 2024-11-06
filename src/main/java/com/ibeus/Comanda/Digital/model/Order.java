@@ -20,6 +20,11 @@ public class Order {
     @JsonManagedReference
     private List<OrderDish> orderDishes = new ArrayList<>();
 
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<OrderStatusHistory> orderStatusHistories = new ArrayList<>();
+
     public Order() {
     }
     public Order(Long orderId) {

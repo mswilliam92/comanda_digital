@@ -6,6 +6,7 @@ import com.ibeus.Comanda.Digital.model.Order;
 import com.ibeus.Comanda.Digital.repository.OrderRepository;
 import com.ibeus.Comanda.Digital.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +19,9 @@ public class OrderController {
 
     @Autowired
     private OrderRepository orderRepository;
+
+    @Autowired
+    private OrderService orderService;
 
     @GetMapping
     public List<Order> getAllOrders() {
@@ -59,5 +63,29 @@ public class OrderController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("/status/{status}")
+    public ResponseEntity<List<Order>> getOrderByStatus(@PathVariable String status) {
+        List<Order> orders = orderService.findOrdersByStatus(status);
+        return ResponseEntity.ok(orders);
+    }
+
+
+
+    @GetMapping("/{id}/status")
+    public ResponseEntity<String> getOrderStatusById(@PathVariable("id") Long id) {
+        try {
+        String status = orderService.findOrderStatusById(id);
+        return ResponseEntity.ok(status);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<Order> updateOrderStatus(@PathVariable Long id, @RequestParam String newStatus) {
+        Order updatedOrder = orderService.updateOrderStatus(id, newStatus);
+        return ResponseEntity.ok(updatedOrder);
     }
 }

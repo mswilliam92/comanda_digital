@@ -12,6 +12,7 @@ import com.ibeus.Comanda.Digital.repository.OrderDishRepository;
 import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ public class OrderDishController {
     @Autowired
     private OrderDishService orderDishService;
 
+    @Transactional
     @PostMapping
     public ResponseEntity<List<OrderDish>> addDishesToOrder(@RequestBody OrderDishRequestDto orderDishRequestDto) {
         if (orderDishRequestDto.getOrderId() == null) {
@@ -39,13 +41,14 @@ public class OrderDishController {
 
         Order order = orderService.findById(orderDishRequestDto.getOrderId());
 
+        List<OrderDish> orderDishes = new ArrayList<>();
 
         if (orderDishRequestDto.getDishes() == null || orderDishRequestDto.getDishes().isEmpty()) {
             return ResponseEntity.badRequest().body(null);
         }
 
-        List<OrderDish> orderDishes = new ArrayList<>();
 
+        double newTotalPrice = order.getTotalPrice();
 
         for (OrderDishDto orderDishDto : orderDishRequestDto.getDishes()) {
 
@@ -61,23 +64,17 @@ public class OrderDishController {
                 return ResponseEntity.badRequest().body(null);
             }
 
-            Optional<OrderDish> existingOrderDishOpt = order.getOrderDishes().stream()
-                    .filter(od -> od.getDish().getId().equals(dish.getId()))
-                    .findFirst();
-            if (existingOrderDishOpt.isPresent()) {
-                OrderDish existingOrderDish = existingOrderDishOpt.get();
-                int newQuantity = existingOrderDish.getQuantity() + orderDishDto.getQuantity();
-                existingOrderDish.setQuantity(newQuantity);
-                orderDishes.add(orderDishService.saveOrderDish(existingOrderDish));
-            } else {
-                OrderDish orderDish = new OrderDish();
-                orderDish.setOrder(order);
-                orderDish.setDish(dish);
-                orderDish.setQuantity(orderDishDto.getQuantity());
+            OrderDish orderDish = new OrderDish();
+            orderDish.setOrder(order);
+            orderDish.setDish(dish);
+            orderDish.setQuantity(orderDishDto.getQuantity());
+
+            double dishTotalPrice = dish.getPrice() * orderDishDto.getQuantity();
+            newTotalPrice += dishTotalPrice;
+
                 orderDishes.add(orderDishService.saveOrderDish(orderDish));
             }
-        }
-        order.updateTotalPrice();
+        order.setTotalPrice(newTotalPrice);
         orderService.saveOrder(order);
 
         return ResponseEntity.status(201).body(orderDishes);
