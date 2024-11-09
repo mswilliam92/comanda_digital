@@ -12,9 +12,6 @@ public class OrderStatusHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "order_id", insertable = false, updatable = false)
-    private Long orderId;
-
     @ManyToOne
     @JoinColumn(name = "order_id", referencedColumnName ="id", nullable = false)
     @JsonBackReference
@@ -33,7 +30,6 @@ public class OrderStatusHistory {
     public OrderStatusHistory(Order order, String status) {
         this.order = order;
         this.status = status;
-        this.orderId = order.getId();
         this.timestamp = LocalDateTime.now();
 
     }
@@ -46,13 +42,6 @@ public class OrderStatusHistory {
         this.id = id;
     }
 
-    public Long getOrderId() {
-        return orderId;
-    }
-
-    public void setOrderId(Long orderId) {
-        this.orderId = orderId;
-    }
 
     public Order getOrder() {
         return order;

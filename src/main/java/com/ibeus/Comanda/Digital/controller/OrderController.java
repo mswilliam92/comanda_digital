@@ -3,7 +3,9 @@ package com.ibeus.Comanda.Digital.controller;
 import com.ibeus.Comanda.Digital.dto.OrderDishDto;
 import com.ibeus.Comanda.Digital.dto.OrderDto;
 import com.ibeus.Comanda.Digital.model.Order;
+import com.ibeus.Comanda.Digital.model.OrderStatusHistory;
 import com.ibeus.Comanda.Digital.repository.OrderRepository;
+import com.ibeus.Comanda.Digital.repository.OrderStatusHistoryRepository;
 import com.ibeus.Comanda.Digital.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,7 +23,14 @@ public class OrderController {
     private OrderRepository orderRepository;
 
     @Autowired
+    private OrderStatusHistoryRepository orderStatusHistoryRepository;
+
+    @Autowired
     private OrderService orderService;
+
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
+    }
 
     @GetMapping
     public List<Order> getAllOrders() {
@@ -37,12 +46,17 @@ public class OrderController {
 
     @PostMapping()
     public ResponseEntity<Order> createOrder(@RequestBody OrderDto orderDto) {
-        Order order = new Order(1L);
-        order.setStatus(orderDto.getStatus());
+        Order order = new Order();
+//        order.setStatus(orderDto.getStatus());
         order.setTotalPrice(orderDto.getTotalPrice());
+        order.setStatus("em espera");
+        order = orderRepository.save(order);
 
-        Order savedOrder = orderRepository.save(order);
-        return ResponseEntity.status(201).body(savedOrder);
+        OrderStatusHistory statusHistory = new OrderStatusHistory(order, "em espera");
+        orderStatusHistoryRepository.save(statusHistory);
+        return ResponseEntity.status(HttpStatus.CREATED).body(order);
+//        Order savedOrder = orderRepository.save(order);
+//        return ResponseEntity.status(201).body(savedOrder);
     }
 
     @PutMapping("/{id}")
@@ -83,9 +97,15 @@ public class OrderController {
         }
     }
 
-    @PutMapping("/{id}/status")
+    @PutMapping("/{id}/status-cozinha")
     public ResponseEntity<Order> updateOrderStatus(@PathVariable Long id, @RequestParam String newStatus) {
-        Order updatedOrder = orderService.updateOrderStatus(id, newStatus);
+        Order updatedOrder = orderService.updateOrderStatusForKitchen(id, newStatus);
+        return ResponseEntity.ok(updatedOrder);
+    }
+
+    @PutMapping("/{id}/status-motoboy")
+    public ResponseEntity<Order> updateOrderStatusForDelivery(@PathVariable Long id, @RequestParam String newStatus) {
+        Order updatedOrder = orderService.updateOrderStatusForDelivery(id, newStatus);
         return ResponseEntity.ok(updatedOrder);
     }
 }

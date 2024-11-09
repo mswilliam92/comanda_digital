@@ -4,6 +4,7 @@ import com.ibeus.Comanda.Digital.model.Order;
 import com.ibeus.Comanda.Digital.model.OrderStatusHistory;
 import com.ibeus.Comanda.Digital.repository.OrderRepository;
 import com.ibeus.Comanda.Digital.repository.OrderStatusHistoryRepository;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -35,10 +36,24 @@ public class OrderService {
     }
     @Transactional
     public Order saveOrder(Order order) {
-        Order savedOrder = orderRepository.save(order);
-        orderRepository.flush();
-        return savedOrder;
+        order.setStatus("em espera");
+
+        order = orderRepository.save(order);
+
+        OrderStatusHistory statusHistory = new OrderStatusHistory();
+        statusHistory.setOrder(order);
+        statusHistory.setStatus("em espera");
+        statusHistory.setTimestamp(LocalDateTime.now());
+
+        orderStatusHistoryRepository.save(statusHistory);
+        return order;
+
+
+//        Order savedOrder = orderRepository.save(order);
+//        orderRepository.flush();
+//        return savedOrder;
     }
+
     @Transactional
     public Order updateOrder(Long id, Order updatedOrder) {
         return orderRepository.findById(id).map(order -> {
@@ -71,19 +86,60 @@ public class OrderService {
                 .orElseThrow(() -> new RuntimeException("Pedido não encontrado com o ID: " + id));
     }
 
-    public Order updateOrderStatus(Long id, String newStatus) {
-        return orderRepository.findById(id).map(order -> {
-            order.setStatus(newStatus);
+//    public Order updateOrderStatus(Long id, String newStatus) {
+//        return orderRepository.findById(id).map(order -> {
+//            order.setStatus(newStatus);
+//
+//            OrderStatusHistory statusHistory = new OrderStatusHistory();
+//            statusHistory.setOrder(order);
+//            statusHistory.setStatus(newStatus);
+//            statusHistory.setTimestamp(LocalDateTime.now());
+//
+//            orderStatusHistoryRepository.save(statusHistory);
+//
+//            return orderRepository.save(order);
+//        }).orElseThrow(() -> new RuntimeException("Pedido não encontrado: " + id));
+//    }
 
-            OrderStatusHistory statusHistory = new OrderStatusHistory();
-            statusHistory.setOrder(order);
-            statusHistory.setStatus(newStatus);
-            statusHistory.setTimestamp(LocalDateTime.now());
+    public Order updateOrderStatusForDelivery(Long id, String newStatus) {
+        Order order = orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Pedido não encontrado: " + id));
 
-            orderStatusHistoryRepository.save(statusHistory);
+        if (!isValidDeliveryStatusTransition(order.getStatus(), newStatus)) {
+            throw new IllegalArgumentException("Transição de status inválida para o motoboy");
+        }
 
-            return orderRepository.save(order);
-        }).orElseThrow(() -> new RuntimeException("Pedido não encontrado: " + id));
+        order.setStatus(newStatus);
+        orderRepository.save(order);
+        orderStatusHistoryService.addStatusHistory(order, newStatus);
+
+        return order;
     }
 
+    private boolean isValidDeliveryStatusTransition(String currentStatus, String newStatus) {
+        return (currentStatus.equals("pronto") && newStatus.equals("a caminho")) ||
+                (currentStatus.equals("a caminho") && newStatus.equals("entregue"));
+    }
+
+    private boolean isValidStatusTransitionForKitchen(String currentStatus, String newStatus) {
+        return (currentStatus.equals("em espera") && newStatus.equals("em preparo")) ||
+                (currentStatus.equals("em preparo") && newStatus.equals("pronto")) ||
+                currentStatus.equals(newStatus);
+    }
+
+    public Order updateOrderStatusForKitchen(Long id, String newStatus) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Pedido não encontrado: " + id));
+
+
+        if (!isValidStatusTransitionForKitchen(order.getStatus(), newStatus)) {
+            throw new IllegalArgumentException("Transição de status inválida para a cozinha");
+        }
+
+
+        order.setStatus(newStatus);
+        orderRepository.save(order);
+        orderStatusHistoryService.addStatusHistory(order, newStatus);
+
+        return order;
+    }
 }
