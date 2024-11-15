@@ -4,6 +4,7 @@ public class OrderDishDto {
     private Long orderId;
     private Long dishId;
     private int quantity;
+//    private String dishName;
 
     public OrderDishDto(){
 
@@ -32,4 +33,12 @@ public class OrderDishDto {
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
+
+//    public String getDishName() {
+//        return dishName;
+//    }
+//
+//    public void setDishName(String dishName) {
+//        this.dishName = dishName;
+//    }
 }
