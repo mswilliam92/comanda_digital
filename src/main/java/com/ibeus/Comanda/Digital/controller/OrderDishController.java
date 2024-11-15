@@ -21,6 +21,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/order-dish")
+@CrossOrigin(origins = "http://localhost:4200")
 public class OrderDishController {
     @Autowired
     private OrderDishRepository orderDishRepository;

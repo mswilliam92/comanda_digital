@@ -38,4 +38,9 @@ public class OrderStatusHistoryService {
     public void deleteByOrderId(Long orderId) {
         orderStatusHistoryRepository.deleteByOrderId(orderId);
     }
+
+    public List<OrderStatusHistory> getHistoryByOrderId(Long orderId) {
+        return orderStatusHistoryRepository.findByOrderId(orderId);
+    }
+
 }

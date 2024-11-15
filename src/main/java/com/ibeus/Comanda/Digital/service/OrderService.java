@@ -116,13 +116,13 @@ public class OrderService {
     }
 
     private boolean isValidDeliveryStatusTransition(String currentStatus, String newStatus) {
-        return (currentStatus.equals("pronto") && newStatus.equals("a caminho")) ||
-                (currentStatus.equals("a caminho") && newStatus.equals("entregue"));
+        return (currentStatus.equals("PRONTO") && newStatus.equals("A CAMINHO")) ||
+                (currentStatus.equals("A CAMINHO") && newStatus.equals("ENTREGUE"));
     }
 
     private boolean isValidStatusTransitionForKitchen(String currentStatus, String newStatus) {
-        return (currentStatus.equals("em espera") && newStatus.equals("em preparo")) ||
-                (currentStatus.equals("em preparo") && newStatus.equals("pronto")) ||
+        return (currentStatus.equals("EM ESPERA") && newStatus.equals("EM PREPARO")) ||
+                (currentStatus.equals("EM PREPARO") && newStatus.equals("PRONTO")) ||
                 currentStatus.equals(newStatus);
     }
 
