@@ -1,5 +1,6 @@
 package com.ibeus.Comanda.Digital.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -20,41 +21,10 @@ public class Dish {
 
     private Double price;
 
-    public Dish() {
-    }
-    public Dish(Long dishId) {
-    }
+    @ManyToOne
+    @JoinColumn(name = "order_id")
+    @JsonIgnore
+    private Order order;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getDescription(){
-        return description;
-    }
-
-    public void setDescription(String description){
-        this.description = description;
-    }
-
-    public String getName(){
-        return name;
-    }
-
-    public void setName(String name){
-        this.name = name;
-    }
-
-    public double getPrice(){
-        return price;
-    }
-
-    public void setPrice(Double price){
-            this.price = price;
-        }
 
 }
