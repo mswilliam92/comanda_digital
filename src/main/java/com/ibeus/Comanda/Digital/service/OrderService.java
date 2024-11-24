@@ -7,6 +7,9 @@ import com.ibeus.Comanda.Digital.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 public class OrderService {
 
@@ -17,16 +20,27 @@ public class OrderService {
     private DishRepository dishRepository;
 
     public Order createOrder(Order order){
-//        for (Dish dish: order.getProducts()){
-//            dishRepository.save(dish);
-//        }
-//        dishRepository.save(order.getProducts().get(0));
-        Dish dish = new Dish();
-        dish.setPrice(10.0);
-        dish.setName("BANANA");
-        dish.setDescription("BANANA GRANDE");
+        List<Dish> pratoSalvo = new ArrayList<>();
+        for (Dish dish: order.getProducts()){
+            Dish pratoExistente = dishRepository.findById(dish.getId()).orElseThrow(() -> new RuntimeException("Prato não encontrado"));
+            pratoSalvo.add(pratoExistente);
+        }
+        order.setProducts(pratoSalvo);
+        return orderRepository.save(order);
+    }
 
-        dishRepository.save(dish);
+    public List<Order> getOrder(){
+        return orderRepository.findAll();
+    }
+
+    public void deleteOrder(Long id){
+        Order order = orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
+        orderRepository.delete(order);
+    }
+
+    public Order updateOrder(Order orderAtualizada, Long id){
+        Order order = orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
+        order.setStatus(orderAtualizada.getStatus());
         return orderRepository.save(order);
     }
 }

@@ -21,5 +21,20 @@ public class OrderController {
         return orderService.createOrder(order);
     }
 
+    @GetMapping
+    public List<Order> getOrder(){
+        return orderService.getOrder();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteOrder(@PathVariable Long id){
+         orderService.deleteOrder(id);
+         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}")
+    public Order updateOrder(@RequestBody Order orderAtualizada, @PathVariable Long id){
+        return orderService.updateOrder(orderAtualizada, id);
+    }
 
 }
