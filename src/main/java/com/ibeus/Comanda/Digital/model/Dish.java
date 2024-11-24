@@ -21,10 +21,10 @@ public class Dish {
 
     private Double price;
 
-    @ManyToOne
-    @JoinColumn(name = "order_id")
-    @JsonIgnore
-    private Order order;
+//    @ManyToOne
+//    @JoinColumn(name = "order_id")
+//    @JsonIgnore
+//    private Order order;
 
 
 }

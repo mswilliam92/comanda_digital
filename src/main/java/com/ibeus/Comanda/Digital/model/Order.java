@@ -15,7 +15,12 @@ import java.util.List;
 
         private String status;
 
-        @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+        @ManyToMany
+        @JoinTable(
+                name = "order_dishes", // Nome da tabela de junção
+                joinColumns = @JoinColumn(name = "order_id"),
+                inverseJoinColumns = @JoinColumn(name = "dish_id")
+        )
         private List<Dish> products;
 
 
