@@ -9,7 +9,7 @@ import com.ibeus.Comanda.Digital.model.Dish;
 import com.ibeus.Comanda.Digital.service.DishService;
 
 import java.util.List;
-
+@CrossOrigin(origins = "*",allowedHeaders = "*")
 @RestController
 @RequestMapping("/orders")
 public class OrderController {

@@ -26,7 +26,11 @@ public class OrderService {
             pratoSalvo.add(pratoExistente);
         }
         order.setProducts(pratoSalvo);
-        return orderRepository.save(order);
+        try{
+            return orderRepository.save(order);
+        }
+        catch(Exception e){
+            throw e;}
     }
 
     public List<Order> getOrder(){
