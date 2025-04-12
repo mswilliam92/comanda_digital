@@ -1,8 +1,7 @@
-package com.ibeus.Comanda.Digital.ProductService;
+package com.ibeus.Comanda.Digital.service;
 
 import com.ibeus.Comanda.Digital.model.Product;
 import com.ibeus.Comanda.Digital.repository.ProductRepository;
-import com.ibeus.Comanda.Digital.service.ProductService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

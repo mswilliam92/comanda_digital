@@ -8,6 +8,12 @@ class ComandaDigitalApplicationTests {
 
 	@Test
 	void contextLoads() {
+		// Esse teste verifica se o contexto do Spring é carregado com sucesso.
 	}
 
+	@Test
+	void mainMethodRuns() {
+		// Esse teste roda o método main para garantir que ele não lança exceções.
+		ComandaDigitalApplication.main(new String[] {});
+	}
 }
