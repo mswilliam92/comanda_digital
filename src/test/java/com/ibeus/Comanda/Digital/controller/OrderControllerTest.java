@@ -1,6 +1,7 @@
-package com.ibeus.Comanda.Digital.controller;
+package com.ibeus.Comanda.Digital.Controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ibeus.Comanda.Digital.controller.OrderController;
 import com.ibeus.Comanda.Digital.model.Order;
 import com.ibeus.Comanda.Digital.model.Product;
 import com.ibeus.Comanda.Digital.service.OrderService;
