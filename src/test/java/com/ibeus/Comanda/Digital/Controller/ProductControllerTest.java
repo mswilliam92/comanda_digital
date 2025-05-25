@@ -1,17 +1,23 @@
-package com.ibeus.Comanda.Digital.controller;
+package com.ibeus.Comanda.Digital.Controller;
 
+import com.ibeus.Comanda.Digital.controller.ProductController;
 import com.ibeus.Comanda.Digital.model.Product;
 import com.ibeus.Comanda.Digital.service.ProductService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
 class ProductControllerTest {
 
@@ -44,30 +50,37 @@ class ProductControllerTest {
     }
 
     @Test
-    void getProductById_ReturnsProduct() {
+    void getProductById_ReturnsProductInResponseEntity() {
         when(productService.findById(1L)).thenReturn(mockProduct);
 
-        Product result = productController.getProductById(1L);
+        ResponseEntity<Product> response = productController.getProductById(1L);
 
-        assertEquals("Produto Teste", result.getName());
+        assertEquals(200, response.getStatusCodeValue());
+        assertNotNull(response.getBody());
+        assertEquals("Produto Teste", response.getBody().getName());
     }
 
     @Test
-    void createProduct_ReturnsCreatedProduct() {
+    void createProduct_ReturnsCreatedResponseEntity() {
         when(productService.create(any(Product.class))).thenReturn(mockProduct);
 
-        Product result = productController.createProduct(mockProduct);
+        ResponseEntity<Product> response = productController.createProduct(mockProduct);
 
-        assertEquals(1L, result.getId());
+        assertEquals(201, response.getStatusCodeValue());
+        assertNotNull(response.getBody());
+        assertEquals(1L, response.getBody().getId());
+        assertTrue(response.getHeaders().getLocation().toString().endsWith("/1"));
     }
 
     @Test
-    void updateProduct_ReturnsUpdatedProduct() {
+    void updateProduct_ReturnsOkResponseEntity() {
         when(productService.update(eq(1L), any(Product.class))).thenReturn(mockProduct);
 
-        Product result = productController.updateProduct(1L, mockProduct);
+        ResponseEntity<Product> response = productController.updateProduct(1L, mockProduct);
 
-        assertEquals(1L, result.getId());
+        assertEquals(200, response.getStatusCodeValue());
+        assertNotNull(response.getBody());
+        assertEquals(1L, response.getBody().getId());
     }
 
     @Test
@@ -77,5 +90,6 @@ class ProductControllerTest {
         ResponseEntity<Void> response = productController.deleteProduct(1L);
 
         assertEquals(204, response.getStatusCodeValue());
+        assertNull(response.getBody());
     }
 }
