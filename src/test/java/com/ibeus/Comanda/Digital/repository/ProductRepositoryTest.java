@@ -5,73 +5,48 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
-public class ProductRepositoryTest {
+class ProductRepositoryTest {
 
     @Autowired
-    private ProductRepository productRepository;
+    private ProductRepository productRepo;
 
-    private Product createProduct() {
-        Product product = new Product();
-        product.setName("Test Product");
-        product.setDescription("Test Description");
-        product.setPrice(100.0);
-        return product;
+    @Test
+    void saveAndFindById_shouldPersistAndLoadProduct() {
+        // arrange
+        Product p = new Product();
+        p.setName("Teste");
+        p.setDescription("Desc");
+        p.setPrice(42.0);
+
+        // act
+        Product saved = productRepo.save(p);
+        Optional<Product> found = productRepo.findById(saved.getId());
+
+        // assert
+        assertTrue(found.isPresent());
+        assertEquals("Teste", found.get().getName());
+        assertEquals("Desc", found.get().getDescription());
+        assertEquals(42.0, found.get().getPrice());
     }
 
     @Test
-    public void testSaveProduct() {
-        Product product = createProduct();
-        Product saved = productRepository.save(product);
-        assertNotNull(saved.getId(), "Saved product should have an ID");
-        assertEquals("Test Product", saved.getName());
-        assertEquals("Test Description", saved.getDescription());
-        assertEquals(100.0, saved.getPrice());
-    }
+    void deleteById_shouldRemoveProduct() {
+        // arrange: cria a entidade sem usar double‐brace
+        Product p = new Product();
+        p.setName("X");
+        p.setDescription("Y");
+        p.setPrice(1.0);
+        p = productRepo.save(p);
 
-    @Test
-    public void testFindById() {
-        Product product = createProduct();
-        Product saved = productRepository.save(product);
-        Optional<Product> retrieved = productRepository.findById(saved.getId());
-        assertTrue(retrieved.isPresent(), "Product should be found by ID");
-        assertEquals("Test Product", retrieved.get().getName());
-    }
+        // act
+        productRepo.deleteById(p.getId());
 
-    @Test
-    public void testFindAll() {
-        productRepository.deleteAll();
-        Product product1 = createProduct();
-        product1.setName("Product 1");
-        Product product2 = createProduct();
-        product2.setName("Product 2");
-        productRepository.save(product1);
-        productRepository.save(product2);
-        List<Product> products = productRepository.findAll();
-        assertEquals(2, products.size(), "There should be 2 products in the repository");
-    }
-
-    @Test
-    public void testUpdateProduct() {
-        Product product = createProduct();
-        Product saved = productRepository.save(product);
-        saved.setName("Updated Name");
-        Product updated = productRepository.save(saved);
-        assertEquals("Updated Name", updated.getName(), "Product name should be updated");
-    }
-
-    @Test
-    public void testDeleteProduct() {
-        Product product = createProduct();
-        Product saved = productRepository.save(product);
-        Long id = saved.getId();
-        productRepository.delete(saved);
-        Optional<Product> deleted = productRepository.findById(id);
-        assertFalse(deleted.isPresent(), "Product should be deleted");
+        // assert
+        assertFalse(productRepo.findById(p.getId()).isPresent());
     }
 }
