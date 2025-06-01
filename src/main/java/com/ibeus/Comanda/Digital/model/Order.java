@@ -2,6 +2,8 @@ package com.ibeus.Comanda.Digital.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -14,11 +16,11 @@ public class Order {
 
     private String status;
 
-    @ManyToMany
-    @JoinTable(
-            name = "order_products", // Alterado de order_dishes para order_products
-            joinColumns = @JoinColumn(name = "order_id"),
-            inverseJoinColumns = @JoinColumn(name = "product_id") // Alterado de dish_id para product_id
+    @OneToMany(
+            mappedBy = "order",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.EAGER
     )
-    private List<Product> products;
+    private List<OrderItem> items = new ArrayList<>();
 }

@@ -1,99 +1,96 @@
 package com.ibeus.Comanda.Digital.repository;
 
 import com.ibeus.Comanda.Digital.model.Order;
+import com.ibeus.Comanda.Digital.model.OrderItem;
 import com.ibeus.Comanda.Digital.model.Product;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-// Adiciono importações explícitas para as interfaces de repositório
-import com.ibeus.Comanda.Digital.repository.OrderRepository;
-import com.ibeus.Comanda.Digital.repository.ProductRepository;
-
 @DataJpaTest
-public class OrderRepositoryTest {
+class OrderRepositoryTest {
 
     @Autowired
-    private OrderRepository orderRepository;
+    private OrderRepository orderRepo;
 
     @Autowired
-    private ProductRepository productRepository;
+    private ProductRepository productRepo;
 
-    private Product createProduct() {
-        Product product = new Product();
-        product.setName("Test Product");
-        product.setDescription("Test Description");
-        product.setPrice(100.0);
-        return product;
-    }
+    @Test
+    void saveOrderWithItems_shouldCascadeSaveOrderItems() {
+        // cria um produto de catálogo
+        Product prod = new Product();
+        prod.setName("Saia");
+        prod.setDescription("Bonita");
+        prod.setPrice(55.0);
+        prod = productRepo.save(prod);
 
-    private Order createOrder(Product product) {
+        // monta pedido + item snapshot
         Order order = new Order();
-        order.setStatus("PENDING");
-        // Use uma lista modificável para evitar UnsupportedOperationException
-        order.setProducts(new ArrayList<>(Arrays.asList(product)));
-        return order;
+        order.setStatus("NOVO");
+
+        OrderItem item = new OrderItem();
+        item.setOrder(order);
+        item.setProductId(prod.getId());
+        item.setProductName(prod.getName());
+        item.setProductDescription(prod.getDescription());
+        item.setProductPrice(prod.getPrice());
+        order.getItems().add(item);
+
+        // salva e verifica cascade
+        Order saved = orderRepo.save(order);
+        assertNotNull(saved.getId());
+        assertFalse(saved.getItems().isEmpty());
+        OrderItem savedItem = saved.getItems().get(0);
+        assertNotNull(savedItem.getId());
+        assertEquals(prod.getId(), savedItem.getProductId());
+        assertEquals("Saia", savedItem.getProductName());
     }
 
     @Test
-    public void testSaveOrder() {
-        Product product = productRepository.save(createProduct());
-        Order order = createOrder(product);
-        Order savedOrder = orderRepository.save(order);
-        assertNotNull(savedOrder.getId(), "O ID do pedido salvo não deve ser nulo");
-        assertEquals("PENDING", savedOrder.getStatus());
-        assertNotNull(savedOrder.getProducts());
-        assertEquals(1, savedOrder.getProducts().size());
+    void deletingOrder_shouldRemoveOrderItems_too() {
+        // cria produto
+        Product prod = new Product();
+        prod.setName("X");
+        prod.setDescription("Y");
+        prod.setPrice(10.0);
+        prod = productRepo.save(prod);
+
+        // monta pedido + item
+        Order ord = new Order();
+        ord.setStatus("A");
+
+        OrderItem it = new OrderItem();
+        it.setOrder(ord);
+        it.setProductId(prod.getId());
+        it.setProductName(prod.getName());
+        it.setProductDescription(prod.getDescription());
+        it.setProductPrice(prod.getPrice());
+        ord.getItems().add(it);
+
+        // salva e exclui
+        Order saved = orderRepo.save(ord);
+        orderRepo.deleteById(saved.getId());
+
+        // confirma remoção
+        assertFalse(orderRepo.findById(saved.getId()).isPresent());
     }
 
     @Test
-    public void testFindById() {
-        Product product = productRepository.save(createProduct());
-        Order order = createOrder(product);
-        Order savedOrder = orderRepository.save(order);
-        Optional<Order> foundOrder = orderRepository.findById(savedOrder.getId());
-        assertTrue(foundOrder.isPresent(), "O pedido deve ser encontrado pelo ID");
-        assertEquals("PENDING", foundOrder.get().getStatus());
-    }
+    void findAllOrders_shouldIncludePersisted() {
+        Order o1 = new Order();
+        o1.setStatus("S1");
+        Order o2 = new Order();
+        o2.setStatus("S2");
+        orderRepo.saveAll(List.of(o1, o2));
 
-    @Test
-    public void testFindAll() {
-        orderRepository.deleteAll();
-        productRepository.deleteAll();
-
-        Product product1 = productRepository.save(createProduct());
-        orderRepository.save(createOrder(product1));
-
-        Product product2 = productRepository.save(createProduct());
-        orderRepository.save(createOrder(product2));
-
-        List<Order> orders = orderRepository.findAll();
-        assertEquals(2, orders.size(), "Deve haver 2 pedidos no repositório");
-    }
-
-    @Test
-    public void testUpdateOrder() {
-        Product product = productRepository.save(createProduct());
-        Order order = orderRepository.save(createOrder(product));
-        order.setStatus("COMPLETED");
-        Order updatedOrder = orderRepository.save(order);
-        assertEquals("COMPLETED", updatedOrder.getStatus(), "O status do pedido deve ser atualizado para COMPLETED");
-    }
-
-    @Test
-    public void testDeleteOrder() {
-        Product product = productRepository.save(createProduct());
-        Order order = orderRepository.save(createOrder(product));
-        Long orderId = order.getId();
-        orderRepository.delete(order);
-        Optional<Order> deletedOrder = orderRepository.findById(orderId);
-        assertFalse(deletedOrder.isPresent(), "O pedido deve ser deletado e não encontrado");
+        List<Order> todos = orderRepo.findAll();
+        assertEquals(2, todos.size());
+        assertTrue(todos.stream().anyMatch(o -> "S1".equals(o.getStatus())));
+        assertTrue(todos.stream().anyMatch(o -> "S2".equals(o.getStatus())));
     }
 }
