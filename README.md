@@ -1,5 +1,3 @@
-Teste
-
 ## INICIANDO O DESENVOLVIMENTO DE TAREFA
 
 git checkout main /  acessando o projeto principal
