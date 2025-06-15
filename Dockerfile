@@ -1,14 +1,22 @@
-# Use uma JRE do Eclipse Temurin (OpenJDK 17)
-FROM eclipse-temurin:17-jre-jammy
-
-# Diretório de trabalho dentro do container
+# Stage 1: build com Maven
+FROM maven:3.9.0-eclipse-temurin-17 AS build
 WORKDIR /app
 
-# Copia o JAR empacotado pelo Maven para dentro do container
-COPY target/*.jar app.jar
+# Copia somente o que precisa para baixar dependências
+COPY pom.xml mvnw ./
+COPY .mvn .mvn
+RUN ./mvnw dependency:go-offline -B
 
-# Expõe a porta que seu Spring Boot usa (padrão 8080)
+# Agora copia o restante e faz o package
+COPY src src
+RUN ./mvnw clean package -DskipTests -B
+
+# Stage 2: runtime apenas com JRE
+FROM eclipse-temurin:17-jre-jammy
+WORKDIR /app
+
+# Copia o JAR gerado no stage anterior
+COPY --from=build /app/target/*.jar app.jar
+
 EXPOSE 8080
-
-# Comando para rodar sua aplicação
-ENTRYPOINT ["java","-jar","/app/app.jar"]
+ENTRYPOINT ["java","-jar","app.jar"]
