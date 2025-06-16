@@ -10,30 +10,22 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableTransactionManagement
 @SpringBootApplication
 public class ComandaDigitalApplication {
+  public static void main(String[] args) {
+    SpringApplication.run(ComandaDigitalApplication.class, args);
+  }
 
-    public static void main(String[] args) {
-        SpringApplication.run(ComandaDigitalApplication.class, args);
-    }
-
-    /**
-     * Configurações de CORS para liberar requisições
-     * vindas do Angular local e do deploy no Vercel.
-     */
-    @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry
-                  .addMapping("/**")
-                  .allowedOrigins(
-                    "http://localhost:4200",
-                    "https://comanda-digital-e8b8.onrender.com",
-                    "https://dishapp-five.vercel.app"
-                  )
-                  .allowedMethods("*");
-            }
-        };
-    }
-
+  @Bean
+  public WebMvcConfigurer corsConfigurer() {
+    return new WebMvcConfigurer() {
+      @Override
+      public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+          // durante o teste, libera qualquer origem:
+          .allowedOrigins("*")
+          // ou, se quiser só liberar sub-domínios:
+          // .allowedOriginPatterns("https://*.vercel.app", "https://*.onrender.com")
+          .allowedMethods("*");
+      }
+    };
+  }
 }
